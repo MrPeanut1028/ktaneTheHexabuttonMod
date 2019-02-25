@@ -203,7 +203,7 @@ public class hexabuttonScript : MonoBehaviour {
         {
             if (lightColor == 5)
             {
-                if (Bomb.GetFormattedTime().EndsWith(":00"))
+                if ((int)Bomb.GetTime() % 60 == 0)
                     answerCorrect = true;
             }
 
@@ -241,8 +241,7 @@ public class hexabuttonScript : MonoBehaviour {
         {
             if (lightColor == 3)
             {
-                string[] oddNumbers = { "1", "3", "5", "7", "9" };
-                if (oddNumbers.Contains(Bomb.GetFormattedTime()[Bomb.GetFormattedTime().Length - 4].ToString()) || Bomb.GetFormattedTime().StartsWith("00:"))
+                if (((int)Bomb.GetTime() / 60) % 2 != 0 || (int)Bomb.GetTime() / 60 == 0)
                     answerCorrect = true;
             }
 
@@ -263,17 +262,8 @@ public class hexabuttonScript : MonoBehaviour {
                 if (Bomb.GetSolvableModuleNames().Count - 1 == Bomb.GetSolvedModuleNames().Count)
                     answerCorrect = true;
 
-                if ((Bomb.GetSolvableModuleNames().Count - Bomb.GetSolvedModuleNames().Count) % 60 < 10)
-                {
-                    if (Bomb.GetFormattedTime().EndsWith(":0" + ((Bomb.GetSolvableModuleNames().Count - Bomb.GetSolvedModuleNames().Count) % 60).ToString()))
-                        answerCorrect = true;
-                }
-                
-                else
-                {
-                    if (Bomb.GetFormattedTime().EndsWith(":" + ((Bomb.GetSolvableModuleNames().Count - Bomb.GetSolvedModuleNames().Count) % 60).ToString()))
-                        answerCorrect = true;
-                }
+                if ((int)Bomb.GetTime() % 60 == (Bomb.GetSolvableModuleNames().Count - Bomb.GetSolvedModuleNames().Count) % 60)
+                    answerCorrect = true;
             }
         }
 
@@ -300,11 +290,11 @@ public class hexabuttonScript : MonoBehaviour {
 
             releaseTime %= 60;
             if (releaseTime > 9)
-                DebugMsg("You should release the button when the last two digits on the timer are " + releaseTime + ".");
+                DebugMsg("You should release the button when the last two seconds digits on the timer are " + releaseTime + ".");
             else
-                DebugMsg("You should release the button when the last two digits on the timer are 0" + releaseTime + ".");
+                DebugMsg("You should release the button when the last two seconds digits on the timer are 0" + releaseTime + ".");
 
-            if (Bomb.GetFormattedTime().EndsWith(releaseTime.ToString()))
+            if ((int)Bomb.GetTime() % 60 == releaseTime)
             {
                 answerCorrect = true;
             }
@@ -370,7 +360,7 @@ public class hexabuttonScript : MonoBehaviour {
 
             foreach (var number in time)
             {
-                if (number != ":")
+                if (number != ":" && number != ".")
                 {
                     occurences = 0;
 
@@ -382,7 +372,7 @@ public class hexabuttonScript : MonoBehaviour {
                         }
                     }
 
-                    if (occurences == 3)
+                    if (occurences >= 3)
                     {
                         answerCorrect = true;
                         break;
@@ -410,8 +400,7 @@ public class hexabuttonScript : MonoBehaviour {
 
         else
         {
-            string[] evenNumbers = { "0", "2", "4", "6", "8" };
-            if (evenNumbers.Contains(Bomb.GetFormattedTime()[Bomb.GetFormattedTime().Length - 4].ToString()))
+            if (((int)Bomb.GetTime() / 60) % 2 == 0 && (int)Bomb.GetTime() / 60 != 0)
             {
                 answerCorrect = true;
             }
