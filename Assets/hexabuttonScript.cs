@@ -1,7 +1,8 @@
-﻿using UnityEngine;
+using UnityEngine;
 using KModkit;
 using System.Collections;
 using System.Linq;
+using System.Collections.Generic;
 
 public class hexabuttonScript : MonoBehaviour {
 
@@ -534,76 +535,121 @@ public class hexabuttonScript : MonoBehaviour {
         btnText.text = ":)";
     }
 
-    /*
-    bool TwitchShouldCancelCommand;
-
-    public string TwitchHelpMessage = "Use !{0} tap X:XX / !{0} slap X:XX where X:XX is the last three digits of the time you want to tap the button on. Use !{0} hold to hold the button. Use !{0} release X:XX where X:XX is the last three digits of the time you want to release the button on.";
-    IEnumerator ProcessTwitchCommand(string cmd)
-    {
-        if (cmd.ToLowerInvariant().StartsWith("tap ") && cmd.ToLowerInvariant().Length == 8 && cmd.ToLowerInvariant()[5].ToString() == ":" && numbers.Contains(cmd.ToLowerInvariant()[4].ToString())
-            && numbers.Contains(cmd.ToLowerInvariant()[6].ToString()) && numbers.Contains(cmd.ToLowerInvariant()[7].ToString()))
-        {
-            while (!Bomb.GetFormattedTime().EndsWith(cmd.Substring(5)))
-            {
-                yield return "trycancel";
-                yield return new WaitForSeconds(.1f);
+    public string TwitchHelpMessage = "Use '!{0} tap' to tap the button! Use '!{0} hold' to hold the button! Use '!{0} tap at ##:##' or '!{0} release at ##:##' to tap or release the button when the timer is equal to the time specified!";
+    IEnumerator ProcessTwitchCommand(string command){
+        string commandl = "";
+        command = command.ToUpper();
+        if(command.Equals("HOLD")){
+            if(!btnHeld){
+                btnHeld=true;
+                yield return null;
+                yield return btnSelectable;
             }
-
-            yield return null;
-            yield return new KMSelectable[] { btnSelectable };
         }
-
-        else if (cmd.ToLowerInvariant().StartsWith("slap ") && cmd.ToLowerInvariant().Length == 9 && cmd.ToLowerInvariant()[6].ToString() == ":" && numbers.Contains(cmd.ToLowerInvariant()[5].ToString())
-            && numbers.Contains(cmd.ToLowerInvariant()[7].ToString()) && numbers.Contains(cmd.ToLowerInvariant()[8].ToString()))
-        {
-            while (!Bomb.GetFormattedTime().EndsWith(cmd.Substring(6)))
-            {
-                yield return new WaitForSeconds(.1f);
+        if(command.Equals("TAP")){
+            if(!btnHeld){    
+                yield return null;
+                yield return btnSelectable;
+                yield return new WaitForSeconds(0.05f);
+                yield return btnSelectable;
             }
-
-            yield return null;
-            yield return new KMSelectable[] { btnSelectable };
         }
-
-        else if (cmd.ToLowerInvariant() == "hold")
-        {
-            if (btnHeld)
-            {
-                yield return "sendtochaterror Uh... it's already held.";
-                yield break;
+        if(command.Contains("TAP AT ")){
+            if(!btnHeld){
+            commandl=command.Replace("TAP AT ","");
+            if(commandl.Contains(":")){
+                yield return null;
+                int minutes = 0;
+                int seconds = 0;
+                int fulltime = 0;
+                string temp = "";
+                List<string> tempstrlist =  new List<string>();
+                int kpindex = 0;
+                int ind = 0;
+                while(kpindex==0){
+                    if(commandl[ind].ToString()==":"){
+                        kpindex=ind;
+                    }
+                    else{
+                        ind++;
+                    }
+                }
+                for(int i = 0;i<kpindex;i++){
+                    tempstrlist.Add(commandl[i].ToString());
+                }
+                foreach(string item in tempstrlist){
+                    temp = temp + item;
+                }
+                if(int.TryParse(temp, out minutes)){
+                minutes=int.Parse(temp);
+                tempstrlist.Clear();
+                temp="";
+                for(int i = kpindex+1;i<commandl.Length;i++){
+                        tempstrlist.Add(commandl[i].ToString());
+                    
+                }
+                foreach(string item in tempstrlist){
+                        temp = temp + item;
+                    }
+                if(int.TryParse(temp, out seconds)){
+                seconds=int.Parse(temp);
+                fulltime=minutes*60+seconds;
+                while (Mathf.FloorToInt(Bomb.GetTime()) != fulltime) yield return "trycancel Button wasn't pressed due to request to cancel.";
+                yield return new WaitForSeconds(0.01f);
+                yield return btnSelectable;
+                yield return new WaitForSeconds(0.05f);
+                yield return btnSelectable;
             }
-
-            yield return null;
-            StartCoroutine(BtnHold());
-            btnHeld = true;
+            }}
         }
-
-        else if (cmd.ToLowerInvariant().StartsWith("release ") && cmd.ToLowerInvariant().Length == 12 && cmd.ToLowerInvariant()[9].ToString() == ":" && numbers.Contains(cmd.ToLowerInvariant()[8].ToString())
-            && numbers.Contains(cmd.ToLowerInvariant()[10].ToString()) && numbers.Contains(cmd.ToLowerInvariant()[11].ToString()))
-        {
-            if (!btnHeld)
-            {
-                yield return "sendtochaterror Uh... it's not held yet.";
-                yield break;
-            }
-
-            yield return "sendtochat You sent that command at " + Bomb.GetFormattedTime() + ".";
-
-            while (!Bomb.GetFormattedTime().EndsWith(cmd.Substring(9)))
-            {
-                yield return "trycancel";
-                yield return new WaitForSeconds(.1f);
-            }
-
-            StopAllCoroutines();
-            Release();
-            btnHeld = false;
         }
-
-        else
-        {
-            yield break;
+        if(command.Contains("RELEASE AT ")){
+            if(btnHeld){
+            commandl=command.Replace("RELEASE AT ","");
+            if(commandl.Contains(":")){
+                yield return null;
+                int kpindex = 0;
+                int ind = 0;
+                int minutes = 0;
+                int seconds = 0;
+                int fulltime = 0;
+                string temp = "";
+                List<string> tempstrlist = new List<string>();
+                while(kpindex==0){
+                    if(commandl[ind].ToString()==":"){
+                        kpindex=ind;
+                    }
+                    else{
+                        ind++;
+                    }
+                }
+                for(int i = 0;i<kpindex;i++){
+                    tempstrlist.Add(commandl[i].ToString());
+                }
+                foreach(string item in tempstrlist){
+                    temp = temp + item;
+                }
+                if(int.TryParse(temp, out minutes)){
+                minutes=int.Parse(temp);
+                tempstrlist.Clear();
+                temp="";
+                for(int i = kpindex+1;i<commandl.Length;i++){
+                        tempstrlist.Add(commandl[i].ToString());
+                    
+                }
+                foreach(string item in tempstrlist){
+                        temp = temp + item;
+                    }
+                if(int.TryParse(temp, out seconds)){
+                seconds=int.Parse(temp);
+                fulltime=minutes*60+seconds;
+                while (Mathf.FloorToInt(Bomb.GetTime()) != fulltime) yield return "trycancel Button wasn't released due to request to cancel.";
+                btnHeld=false;
+                yield return new WaitForSeconds(0.01f);
+                yield return btnSelectable;
+            }}
+            }
+        }
         }
     }
-    */
 }
