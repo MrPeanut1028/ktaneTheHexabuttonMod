@@ -401,7 +401,11 @@ public class hexabuttonScript : MonoBehaviour {
 
             sum %= 10;
 
-            if ((int)Bomb.GetTime() % sum == 0 || sum == 0)
+            if (sum == 0)
+            {
+                answerCorrect = true;
+            }
+            else if((int)Bomb.GetTime() % sum == 0)
             {
                 answerCorrect = true;
             }
